@@ -1,17 +1,93 @@
 # clstm
 
-CLSTM is an implementation of the LSTM recurrent neural network
-model in C++, using the Eigen library for numerical computations.
+[![CircleCI](https://circleci.com/gh/tmbdev/clstm/tree/master.svg?style=svg)](https://circleci.com/gh/tmbdev/clstm/tree/master)
 
-# TODO
+CLSTM is an implementation of the
+[LSTM](https://en.wikipedia.org/wiki/Long_short-term_memory) recurrent neural
+network model in C++, using the [Eigen](http://eigen.tuxfamily.org) library for
+numerical computations.
 
-  - TensorFlow bindings
-  - more recurrent network types
-  - more 2D LSTM support
-  - multicore support
-  - better GPU support
+# Future Plans
+
+| Project Announcements
+|:-----------------------
+| Please welcome @zuphilip and @kba as additional project maintainers. (10/15/2016)
+
+CLSTM is mainly in maintenance mode now. It was created at a time when there weren't a lot of good LSTM
+implementations around, but several good options have become available over the last year. Nevertheless, if
+you need a small library for text line recognition with few dependencies, CLSTM is still a good option.
+I'm planning on creating a new open source text recognition system from the ground up, combining advances
+in recurrent neural networks, attention, GPU computing, and using some of the libraries that have become
+available now.
+
+# Prerequisites
+
+ - scons, swig, Eigen
+ - protocol buffer library and compiler
+ - libpng
+ - Optional: HDF5, ZMQ, Python
+
+```sh
+# Ubuntu 15.04 / Debian 8
+sudo apt-get install scons libprotobuf-dev libprotobuf9 protobuf-compiler libpng-dev libeigen3-dev swig
+
+# Ubuntu 14.04:
+sudo apt-get install scons libprotobuf-dev libprotobuf8 protobuf-compiler libpng-dev swig
+```
+
+The Debian repositories jessie-backports and stretch include sufficiently new libeigen3-dev packages.
+
+It is also possible to download [Eigen](http://eigen.tuxfamily.org) with Tensor support (> v3.3-beta1)
+and copy the header files to an `include` path:
+
+```sh
+# with wget
+wget 'https://github.com/RLovelett/eigen/archive/3.3-rc1.tar.gz'
+tar xf 3.3-rc1.tar.gz
+rm -f /usr/local/include/eigen3
+mv eigen-3.3-rc1 /usr/local/include/eigen3
+# or with git:
+sudo git clone --depth 1 --single-branch --branch 3.3-rc1 \
+  "https://github.com/RLovelett/eigen" /usr/local/include/eigen3
+```
+
+To use the [visual debugging methods](#user-content-display), additionally:
+
+```sh
+# Ubuntu 15.04:
+sudo apt-get install libzmq3-dev libzmq3 libzmqpp-dev libzmqpp3 libpng12-dev
+```
+
+For [HDF5](#user-content-hdf5), additionally:
+
+```sh
+# Ubuntu 15.04:
+sudo apt-get install hdf5-helpers libhdf5-8 libhdf5-cpp-8 libhdf5-dev python-h5py
+
+# Ubuntu 14.04:
+sudo apt-get install hdf5-helpers libhdf5-7 libhdf5-dev python-h5py
+```
 
 # Getting Started
+
+To build a standalone C library, run
+
+    scons
+    sudo scons install
+
+There are a bunch of options:
+
+ - `debug=1` build with debugging options, no optimization
+ - <a id="display">`display=1`</a> build with display support for debugging (requires ZMQ, Python)
+ - `prefix=...` install under a different prefix (untested)
+ - `eigen=...` where to look for Eigen include files (should contain `Eigen/Eigen`)
+ - <a id="hdf5">`hdf5lib=hdf5`</a> what HDF5 library to use; enables HDF5 command line 
+   programs (may need `hdf5_serial` in some environments)
+
+After building the executables, you can run two simple test runs as follows:
+
+ - `run-cmu` will train an English-to-IPA LSTM
+ - `run-uw3-500` will download a small OCR training/test set and train an OCR LSTM
 
 There is a full set of tests in the current version of clstm; just
 run them with:
@@ -24,40 +100,6 @@ This will check:
  - training a simple model through the C++ API
  - training a simple model through the Python API
  - checking the command line training tools, including loading and saving
-
-To build a standalone C library, run
-
-    scons
-    sudo scons install
-
-Prerequisites:
-
- - scons, Eigen
- - protocol buffer library and compiler
-
-Optional: HDF5, ZMQ, Python
-
-On Ubuntu 15.04, this means:
-
-    sudo apt-get install mercurial\
-    hdf5-helpers libhdf5-8 libhdf5-cpp-8 libhdf5-dev python-h5py \
-    libprotobuf-dev libprotobuf9 protobuf-compiler \
-    libzmq3-dev libzmq3 libzmqpp-dev libzmqpp3 libpng12-dev
-    cd /usr/local/include && hg clone http://bitbucket.org/eigen/eigen eigen3 && hg up tensorflow_fix && cd -
-
-There are a bunch of options:
-
- - `debug=1` build with debugging options, no optimization
- - `display=1` build with display support for debugging (requires ZMQ, Python)
- - `prefix=...` install under a different prefix (untested)
- - `eigen=...` where to look for Eigen include files (should contain `Eigen/Eigen`)
- - `hdf5lib=hdf5` what HDF5 library to use; enables HDF5 command line 
-   programs (may need `hdf5_serial` in some environments)
-
-After building the executables, you can run two simple test runs as follows:
-
- - `run-cmu` will train an English-to-IPA LSTM
- - `run-uw3-500` will download a small OCR training/test set and train an OCR LSTM
 
 To build the Python extension, run
 
@@ -162,7 +204,7 @@ The `clstm.i` file implements a simple Python interface to clstm, plus
 a wrapper that makes an INetwork mostly a replacement for the lstm.py
 implementation from ocropy.
 
-# Comand Line Drivers
+# Command Line Drivers
 
 There are several command line drivers:
 
